@@ -3,11 +3,11 @@ TFE integration[Done]
 The project is to replace the current, single-threaded, SOAP +FTP       implementation with a multi-threaded, TPA implementation.
 Expanding TFE integration[In progress]
 We will build a RESTful Web Service to expand the TFE integration with the TPA SDK and microservices using Spring,Spring Boot and Spring Cloud, so that to increase the services for mobile phone, tablet or some other existing systems to access. Take mobile phone for example, using the phone, the TFE user can send files to or receive files from internal users, and send files to external partners such as suppliers.
-![image](https://github.com/ShunyiChen/Build2017/blob/master/Overall Layout.png)
-![image](https://github.com/ShunyiChen/Build2017/blob/master/Microservices with Spring.png)
+![image](https://github.com/ShunyiChen/Build2017/blob/master/OverallLayout.png)
+![image](https://github.com/ShunyiChen/Build2017/blob/master/MicroservicesWithSpring.png)
 API Gateway
 An API Gateway is a single point of entry (and control) for front end clients, which could be browser based or mobile. The client only has to know the URL of one server, and the backend can be refactored at will with no change, which is a significant advantage. There are other advantages in terms of centralization and control: rate limiting, authentication, auditing and logging.
-![image](https://github.com/ShunyiChen/Build2017/blob/master/Deploy microservices in the hybrid cloud.png)
+![image](https://github.com/ShunyiChen/Build2017/blob/master/DeployMicroservicesInTheHybridCloud.png)
 API Details
 TFE user login – The user account is only authenticated with TRUfustion and generate and save the session id on the server.
 Get available transactions – Get available transactions by calling the TPA SDK.
