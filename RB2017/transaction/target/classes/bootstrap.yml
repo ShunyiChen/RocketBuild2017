@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: image-service
+  cloud:
+    config:
+      profile: default
+      label: master
+      uri: http://127.0.0.1:8888/
