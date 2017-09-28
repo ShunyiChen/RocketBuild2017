@@ -1,5 +1,5 @@
 server:
-  port: 9003
+  port: 2222
 spring:
   application:
     name: auth
@@ -10,4 +10,4 @@ logging:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://127.0.0.1:8761/eureka/
+      defaultZone: http://10.48.5.75:1111/eureka/
