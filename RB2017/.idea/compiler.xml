@@ -7,10 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="auth" />
-        <module name="auth-server" />
         <module name="discovery" />
         <module name="discovery-server" />
-        <module name="eureka-server" />
         <module name="file" />
         <module name="gateway" />
         <module name="transaction" />
@@ -19,10 +17,8 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="auth" target="1.8" />
-      <module name="auth-server" target="1.8" />
       <module name="discovery" target="1.8" />
       <module name="discovery-server" target="1.8" />
-      <module name="eureka-server" target="1.8" />
       <module name="file" target="1.8" />
       <module name="gateway" target="1.8" />
       <module name="RB2017" target="1.8" />
