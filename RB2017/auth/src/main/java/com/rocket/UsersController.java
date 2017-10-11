@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -38,13 +37,10 @@ public class UsersController {
 		
 		List<Map<String, Object>> users = jdbcTemplate.queryForList("SELECT * FROM USERS WHERE ACCOUNT='"+account+"'");
 		if (users.isEmpty()) {
-			return new Response("", HttpStatus.UNAUTHORIZED);
+			return new Response("Logon failed.", HttpStatus.NOT_FOUND);
 		} else {
-			
-			return new Response("this is a token", HttpStatus.OK);
+			return new Response("Login successfully.", HttpStatus.OK);
 		}
     }
-	
-	
 	
 }
