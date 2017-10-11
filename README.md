@@ -15,3 +15,23 @@ Get contact list or partners – Get the contact list or partner list by reading
 Sending files – Send file from mobile phone to TRUcore server by calling the TPA SDK to encrypt the file and upload it over the UDT protocol.
 Receiving files – Write a business class for polling and checking whether there are new transactions in the list. If so, download the file and decrypt it by calling the TPA SDK over the UDT protocol.
 TFE user logout – The same as the logic in TRUFusion.
+
+How to run the services.
+
+1.Commands for building project:
+cd \rocket-build2017\RB2017
+mvn clean intall
+
+2.Commands for starting up services:
+cd \rocket-build2017\RB2017\discovery
+java -jar target/discovery-1.0.jar
+cd \rocket-build2017\RB2017\auth
+java -jar target/auth-1.0.jar
+
+3.Test in JMeter
+Open the JMeter
+Import the Build.2017.jmx
+run the rest-login/reset-hello
+
+
+
