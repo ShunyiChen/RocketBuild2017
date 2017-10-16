@@ -1,7 +1,6 @@
 package com.rocket;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,32 +12,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rocket.client.TpaContext;
+import com.rocket.tpa.model.tpackage.Recipient;
+
 @RestController
-public class UsersController {
+public class HelloController {
 
 	private Logger logger ;
-	
+	private TpaContext context;
 	@Autowired
     private JdbcTemplate jdbcTemplate;
 	
-	public UsersController() {
+	public HelloController() {
+		System.out.println("=========== Load <tpa-sdk-config.win.xml> =============");
 		logger = Logger.getLogger(getClass().getName());
+		// Setup TPA SDK
+    	context = new TpaContext(getClass().getResourceAsStream("/tpa-sdk-config.win.xml"));
 	}
 	
-	@RequestMapping(value="/auth",method = RequestMethod.POST)
+	@RequestMapping(value="/example",method = RequestMethod.POST)
 	@ResponseBody
-    public Response auth(@RequestBody Request request) {
+    public Response example(@RequestBody Request request) {
 		
-		logger.info("Request json");
-		String account = request.getUserName();
-		logger.info("account="+account);
-		
-		List<Map<String, Object>> users = jdbcTemplate.queryForList("SELECT * FROM USERS WHERE ACCOUNT='"+account+"'");
-		if (users.isEmpty()) {
-			return new Response("Logon failed.", HttpStatus.NOT_FOUND);
-		} else {
-			return new Response("Login successfully.", HttpStatus.OK);
-		}
+		return new Response(HttpStatus.OK);
     }
 	
 }

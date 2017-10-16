@@ -1,8 +1,8 @@
 server:
-  port: 6666
+  port: 10022
 spring:
   application:
-    name: auth-server
+    name: trans
 logging:
   level:
     root: INFO

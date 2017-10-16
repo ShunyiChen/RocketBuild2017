@@ -1,8 +1,8 @@
 server:
-  port: 3333
+  port: 10020
 spring:
   application:
-    name: auth-server
+    name: file
 logging:
   level:
     root: INFO
