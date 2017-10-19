@@ -1,6 +1,7 @@
 package com.rocket;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rocket.client.TpaContext;
-import com.rocket.tpa.FindPartners;
-import com.rocket.tpa.model.tpackage.Recipient;
 
 @RestController
 public class TransactionController {
@@ -31,16 +30,15 @@ public class TransactionController {
     	context = new TpaContext(getClass().getResourceAsStream("/tpa-sdk-config.win.xml"));
 	}
 	
-	@RequestMapping(value="/findPartners",method = RequestMethod.POST)
+	@RequestMapping(value="/jobs",method = RequestMethod.POST)
 	@ResponseBody
-    public Response findPartners(@RequestBody Request request) {
-		FindPartners fp = new FindPartners(context);
-		List<Recipient> partners = fp.call();
-		
+    public Response getJobs(@RequestBody Request request) {
+		int userId = request.getUserId();
+		String sql = "SELECT * FROM DDXADMIN.JOB WHERE ID_USER = "+userId+" AND DELETED = 1 ORDER BY ID DESC";
+		logger.info("sql="+sql);
+		List<Map<String, Object>> results = jdbcTemplate.queryForList(sql);
 		Response res = new Response(HttpStatus.OK);
-		res.setPartners(partners);
-		
-		
+		res.setResults(results);
 		return res;
     }
 	

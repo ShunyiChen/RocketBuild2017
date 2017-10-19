@@ -1,6 +1,8 @@
 package com.rocket;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 
@@ -13,6 +15,7 @@ public class Response implements Serializable {
 	
 	private HttpStatus status;
 	private String token;
+	private List<Map<String, Object>> company_user_info;
 	
 	public Response(String token, HttpStatus status) {
 		this.token = token;
@@ -33,6 +36,14 @@ public class Response implements Serializable {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public List<Map<String, Object>> getCompany_user_info() {
+		return company_user_info;
+	}
+
+	public void setCompany_user_info(List<Map<String, Object>> company_user_info) {
+		this.company_user_info = company_user_info;
 	}
 	
 }

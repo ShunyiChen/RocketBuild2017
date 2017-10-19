@@ -8,21 +8,24 @@ public class Request implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 4476463833323485681L;
-	
-	private String userName;
-	private String password;
-	
-	public String getUserName() {
-		return userName;
+
+	private int idPartnerFactory;
+	private int userId;
+
+	public int getIdPartnerFactory() {
+		return idPartnerFactory;
 	}
-	public void setUserName(String userName) {
-		this.userName = userName;
+
+	public void setIdPartnerFactory(int idPartnerFactory) {
+		this.idPartnerFactory = idPartnerFactory;
 	}
-	public String getPassword() {
-		return password;
+
+	public int getUserId() {
+		return userId;
 	}
-	public void setPassword(String password) {
-		this.password = password;
+
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
-	
+
 }
