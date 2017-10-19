@@ -41,7 +41,7 @@ Open a command window again<br>
 -> cd \rocket-build2017\RB2017\transaction<br>
 -> java -jar target/transaction-1.0.jar<br>
 ... ...<br>
-Start all services which one you want to start.<br>
+Just start what you want to run.<br>
 ### Test in JMeter<br>
 Start up the JMeter<br>
 Import the Build.2017.jmx<br>
