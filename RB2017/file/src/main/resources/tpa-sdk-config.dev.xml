@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <identity>http://10.48.5.48/Identity/</identity> <trushare>http://10.48.5.48/Trushareapi/api/share/</trushare> 
+	<mfx-base>http://10.48.5.48/mfx/</mfx-base> -->
+<runtime>
+    <sdk-runtime>
+        <identity>http://wal-vm-dvtcapp1:93/Identity</identity>
+        <trushare>http://wal-vm-dvtcapp1:93/Trushare/api/share/</trushare>
+        <mfx-base>http://wal-vm-dvtcapp1:93/mfx/</mfx-base>
+        <protocol-priority>HTTP</protocol-priority>
+        <mfx-grid>false</mfx-grid>
+        <mfx-upload>upload.aspx</mfx-upload>
+        <mfx-download>download.aspx</mfx-download>
+        <tcp-host>wal-vm-dvtcapp1</tcp-host>
+        <tcp-port>443</tcp-port>
+        <tcp-tls>TLSV1.2</tcp-tls>
+        <udt-host>wal-vm-dvtcapp1</udt-host>
+        <udt-port>9005</udt-port>
+        <encrypt-folder>C:\Rocket\Trubiquity\Truexchange\tmp\upload\</encrypt-folder>
+        <download-folder>C:\Rocket\Trubiquity\Truexchange\tmp\download\</download-folder>
+        <privatekey-type>LOCAL</privatekey-type>
+        <privatekey-folder>C:\Rocket\Trubiquity\Truexchange\tmp\privateKey\</privatekey-folder>
+        <connection-timeout>30000</connection-timeout>
+        <socket-timeout>30000</socket-timeout>
+        <http-client-classpath>com.rocket.tpa.http.JdkNativeHttpClient</http-client-classpath>
+        <client-app>TFE</client-app>
+    </sdk-runtime>
+    <oem-runtime>
+        <token>V5HIL+AgFKsBMqny9njAfQ==</token>
+        <community-default-name>CCX</community-default-name>
+    </oem-runtime>
+    <proxy-server>
+        <host></host>
+        <port></port>
+        <schema></schema>
+    </proxy-server>
+</runtime>
