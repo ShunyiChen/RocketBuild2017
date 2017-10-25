@@ -3,12 +3,21 @@ package com.rocket.tpa;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.rocket.client.TpaContext;
 import com.rocket.tpa.api.CommunityApi;
 import com.rocket.tpa.api.IdentityApi;
+import com.rocket.tpa.api.LocationApi;
 import com.rocket.tpa.api.TrushareApi;
 import com.rocket.tpa.config.RuntimeConfig;
 import com.rocket.tpa.mfx.MFXClient;
@@ -21,8 +30,11 @@ import com.rocket.tpa.model.Enums.MetaDataType;
 import com.rocket.tpa.model.Enums.ShareActions;
 import com.rocket.tpa.model.admin.Community;
 import com.rocket.tpa.model.admin.MetaDataField;
+import com.rocket.tpa.model.common.Filter;
+import com.rocket.tpa.model.identity.CustomCertificateToken;
 import com.rocket.tpa.model.identity.EncryptionKey;
 import com.rocket.tpa.model.identity.KeyData;
+import com.rocket.tpa.model.identity.Location;
 import com.rocket.tpa.model.identity.User;
 import com.rocket.tpa.model.identity.interfaces.IIdentityToken;
 import com.rocket.tpa.model.tpackage.PackageActionsDetail;
@@ -32,38 +44,155 @@ import com.rocket.tpa.model.tpackage.PackagePayload;
 import com.rocket.tpa.model.tpackage.Recipient;
 import com.rocket.tpa.model.tpackage.TpaPackage;
 
-public class UploadAndDownload {
+/**
+ * 
+ * TEST OBJECTIVES:
+ * 
+ * (1)JSafe RSA library replacement with Java Standard library; (2)MD5
+ * replacement with SHA256; (3)Migration path 1024 to 2048 RSA keys;
+ * 
+ * 
+ * @author chens
+ */
+public class TestOnDev {
 
-	private MFXClient mfxClient = null;
-	private TrushareApi trushareApi = null;
-	private CommunityApi communityApi = null;
+	// TRUcore user
+	public String recipientUsername = "ventchev11";
+	public String recipientFirstName = "Vladtest";
+	public String recipientLastName = "Test";
+	public String recipientCompanyName = "Rocket Software";
+	// TFE user
+	public String senderUserName = "tfetpa1";
+	private String tokenString = "1URhI01VOE383zTkxkV5fL10+e8sN7QOsNa2hHxMjderAoa3efM3R1rKbAQxW5q2L05QWzIFrKdDzpwvu904g8AIBBuJssjJXR5+FrCAxYF/mNjn/L/BRWn2ZKyE1LHZ";
+	private TpaContext context;
+	private MFXClient mfxClient;
 	private IdentityApi identityApi = null;
-
-	public UploadAndDownload(TpaContext context) {
-		mfxClient = (MFXClient) context.getApi("MFXClient");
-		trushareApi = (TrushareApi) context.getApi("TrushareApi");
-		communityApi = (CommunityApi) context.getApi("CommunityApi");
-		identityApi = (IdentityApi) context.getApi("IdentityApi");
+	private TrushareApi trushareApi;
+	private LocationApi locationApi;
+	private CommunityApi communityApi;
+	private CustomCertificateToken token;
+	
+	private JdbcTemplate jdbcTemplate;
+	private int jobId;
+	
+	public void setJobId(int jobId) {
+		this.jobId = jobId;
 	}
 
-	/**
-	 * Fill the package information
-	 *
-	 * @param token
-	 *            Sender's token
-	 * @param communityID
-	 *            Sender's community Id
-	 * @param lsRecipients
-	 *            Recipient list
-	 * @param sender
-	 *            Sender object
-	 * @param files
-	 *            File list
-	 * @param comments
-	 *            Comments
-	 * @return
-	 */
-	public TpaPackage fillPackage(IIdentityToken token, String communityID, List<Recipient> lsRecipients, User sender,
+	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
+	public static void main(String[] args) {
+//		// Downloads files in a multithreaded environment
+//		Thread t1 = new Thread() {
+//			@Override
+//			public void run() {
+//				TestOnDev t = new TestOnDev();
+//				t.setUp();
+//				t.download("8799H917577");
+//			}
+//		};
+//		Thread t2 = new Thread() {
+//			@Override
+//			public void run() {
+//				TestOnDev t = new TestOnDev();
+//				t.setUp();
+//				t.download("8799H917575");
+//			}
+//		};
+//		t2.start();
+//		t1.start();
+		
+		String dt = System.currentTimeMillis()+"";
+		dt = dt.substring(0, dt.length() -3);
+		int datetime = Integer.parseInt(dt);
+		
+		System.out.println(datetime);
+		
+	}
+
+	// Upload file paths
+	private String[] uploadFiles = {
+			// "C:\\Demo\\Files\\500MB.zip"
+			"C:\\Demo\\Files\\Koala.jpg"
+			// "C:\\Demo\\Files\\175MB.zip"
+	};
+	
+	@Before
+	public void setUp() {
+		System.out.println("SDK initialization ...");
+		context = new TpaContext(getClass().getResourceAsStream("/tpa-sdk-config.dev.xml"));
+//		context = new TpaContext(
+//				"C:\\Users\\chens\\Documents\\development\\gxg_java\\TPA-SDK-Java\\config\\tpa-sdk-config.dev.xml");
+		mfxClient = (MFXClient) context.getApi("MFXClient");
+		identityApi = (IdentityApi) context.getApi("IdentityApi");
+		locationApi = (LocationApi) context.getApi("LocationApi");
+		trushareApi = (TrushareApi) context.getApi("TrushareApi");
+		communityApi = (CommunityApi) context.getApi("CommunityApi");
+		token = new CustomCertificateToken();
+		token.setAuthenticationToken(tokenString);
+	}
+	
+	public void setUploadFiles(String[] uploadFiles) {
+		this.uploadFiles = uploadFiles;
+	}
+
+	@Test
+	public void testcase3() {
+		download("8799H917575");
+	}
+
+	@After
+	public void tearDown() {
+	}
+	
+
+	private void create() {
+		User user = this.getUserAsync(senderUserName);
+		Assert.assertNotNull(user);
+		KeyData keyData = new KeyData();
+		keyData.UserUniqueID = user.UserUniqueID;
+		keyData.Username = user.Username;
+		keyData.KeyType = KeyType.User;
+		// Create the key pair(public key and private key)
+		identityApi.createKeyAsync(token, keyData);
+	}
+
+	private void upload() {
+		// Get sender's user profile
+		User sender = this.getUserAsync(this.senderUserName);
+		List<File> files = new ArrayList<File>();
+		for (String path : uploadFiles) {
+			File uploadFile = new File(path);
+			files.add(uploadFile);
+		}
+		// Get sender's community
+		List<Community> lsCommunities = communityApi.getCommunitiesOfUserAsync(token, sender.UserUniqueID);
+		if (lsCommunities.size() == 0)
+			return;
+		Community community = lsCommunities.get(0);
+		// Find partners by the recipient names
+		List<Recipient> partners = trushareApi.findPartnersAsync(token, community.CommunityUniqueID,
+				recipientCompanyName, null, null, recipientFirstName, recipientLastName, null, null, null, null, 0, 99);
+		// Filter the recipient
+		Iterator<Recipient> iter = partners.iterator();
+		while (iter.hasNext()) {
+			Recipient rec = iter.next();
+			if (!rec.Username.equals(recipientUsername)) {
+				iter.remove();
+			}
+		}
+		// Fill the package information
+		TpaPackage tpackage = fillPackage(token, community.CommunityUniqueID, partners, sender, files, "no comments.");
+		// Create the package on the server
+		tpackage = trushareApi.createPackageAsync(token, tpackage);
+		// Upload package files
+		uploadPackageFilesAsync(token, tpackage, community, sender, partners, files);
+	}
+	
+
+	private TpaPackage fillPackage(IIdentityToken token, String communityID, List<Recipient> lsRecipients, User sender,
 			List<File> files, String comments) {
 		TpaPackage tpaPackage = new TpaPackage();
 		tpaPackage.Sender = sender;
@@ -107,23 +236,7 @@ public class UploadAndDownload {
 		return tpaPackage;
 	}
 
-	/**
-	 * Upload package files
-	 *
-	 * @param token
-	 *            Sender's token
-	 * @param package1
-	 *            created package
-	 * @param community
-	 *            Sender's community
-	 * @param sender
-	 *            Sender object
-	 * @param recipients
-	 *            Recipients list
-	 * @param files
-	 *            File list
-	 */
-	public void uploadPackageFilesAsync(final IIdentityToken token, final TpaPackage package1, Community community,
+	private void uploadPackageFilesAsync(final IIdentityToken token, final TpaPackage package1, Community community,
 			User sender, final List<Recipient> recipients, List<File> files) {
 		try {
 			// Prepare the public key and private key for sender
@@ -182,8 +295,11 @@ public class UploadAndDownload {
 
 						@Override
 						public void onCompletelyFinish() {
-							System.out.println("Done.");
-							updateTransactionStatus(token, package1.PackageID, recipients, ShareActions.Send);
+							
+							DBinsert(package1);
+							
+							System.out.println("UploadListener : onCompletelyFinish");
+							updateStatus(token, package1.PackageID, recipients, ShareActions.Send);
 						}
 
 					});
@@ -192,40 +308,44 @@ public class UploadAndDownload {
 		}
 	}
 
-	/**
-	 * Download package
-	 *
-	 * @param refNumber
-	 *            Specified transaction reference number to download
-	 * @param token
-	 *            Receiver's token
-	 * @param recipient
-	 *            Receiver object
-	 */
-	public void downloadPackage(String refNumber, final IIdentityToken token, final User recipient) {
+	private void updateStatus(IIdentityToken token, String packageID, List<Recipient> recipients, ShareActions act) {
+		PackageActionsDetail packageAction = new PackageActionsDetail();
+		packageAction.Action = act;
+		packageAction.PackageID = packageID;
+		packageAction.Recipients = recipients;
+		packageAction.ClientApp = "TFE";
+		trushareApi.actionPackageAsync(token, packageAction);
+	}
+	
+	private void DBinsert(TpaPackage pack) {
+		String sql = "INSERT INTO ddxadmin.JOB_TRUCORE (ID,ID_JOB,TRANS_ID,TRANS_REF,STATUS_TRANS,STATUS_SENDER,STATUS_TEXT,DELETED) values ("+jobId+", "+jobId+", '"+pack.PackageID+"','"+pack.TransactionRefNumber+"',null,null,'Created',1)";
+		this.jdbcTemplate.execute(sql);
+		
+	}
+
+	private void download(String refnumber) {
 		try {
 			PackageFilters fltr = new PackageFilters();
 			List<TpaPackage> packages = trushareApi.getPackagesAsync(token, fltr, PackageFilterType.RECEIVED);
 			for (final TpaPackage pack : packages) {
-				if (refNumber.equals(pack.TransactionRefNumber)) {
+				if (refnumber.equals(pack.TransactionRefNumber)) {
 					KeyData recipientPrivateKeyInfo = new KeyData();
 					recipientPrivateKeyInfo.KeyType = KeyType.User;
 					if (pack.CommunityEncryptionType == CommunityEncryptionType.UserkeystoredonUserMachine) {
 						KeyData param = new KeyData();
 						param.KeyType = KeyType.User;
 						param.UserUniqueID = pack.Sender.UserUniqueID;
-
 						EncryptionKey senderPublicKey = identityApi.getPublicKeyAsync(token, param);
 						// Get public key
 						EncryptionKey PublicKey = new EncryptionKey();
 						PublicKey.KeyString = senderPublicKey.KeyString;
-						PublicKey.KeyPassphrase = recipient.Username;
+						PublicKey.KeyPassphrase = senderUserName;
 						// Get private key
 						EncryptionKey PrivateKey = new EncryptionKey();
-						PrivateKey.KeyPassphrase = recipient.Username;
+						PrivateKey.KeyPassphrase = senderUserName;
 						recipientPrivateKeyInfo.setPublicKey(PublicKey);
 						recipientPrivateKeyInfo.setPrivateKey(PrivateKey);
-						recipientPrivateKeyInfo.setUsername(recipient.Username);
+						recipientPrivateKeyInfo.setUsername(senderUserName);
 						// Get files list
 						List<PackagePayload> filesPayload = new ArrayList<PackagePayload>();
 						for (PackagePayload p : pack.Payloads) {
@@ -271,12 +391,16 @@ public class UploadAndDownload {
 
 									@Override
 									public void onCompletelyFinish() {
+										
+										System.out.println("DownloadListener : onCompletelyFinish");
 										List<Recipient> lst = new ArrayList<Recipient>();
 										Recipient r = new Recipient();
-										r.set_userUniqueID(recipient.getUserUniqueID());
-										r.setUserUniqueID(recipient.getUserUniqueID());
+										User user = getUserAsync(senderUserName);
+										r.set_userUniqueID(user.getUserUniqueID());
+										r.setUserUniqueID(user.getUserUniqueID());
 										lst.add(r);
-										updateTransactionStatus(token, pack.PackageID, lst, ShareActions.Download);
+										// Update the package status when it finished the download
+										updateStatus(token, pack.PackageID, lst, ShareActions.Download);
 									}
 
 								}, true);
@@ -287,28 +411,51 @@ public class UploadAndDownload {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
-	 * Update transaction status if the upload/download was finished.
+	 * Query a user by username in location users
 	 *
-	 * @param token
-	 *            user's token
-	 * @param packageID
-	 *            Package Id
-	 * @param recipients
-	 *            Recipient list
-	 * @param act
-	 *            Transaction status
+	 * @param username
+	 * @return
 	 */
-	private void updateTransactionStatus(IIdentityToken token, String packageID, List<Recipient> recipients,
-			ShareActions act) {
-		PackageActionsDetail packageAction = new PackageActionsDetail();
-		packageAction.Action = act;
-		packageAction.PackageID = packageID;
-		packageAction.Recipients = recipients;
-		packageAction.ClientApp = "JWS";
-		trushareApi.actionPackageAsync(token, packageAction);
+	private User getUserAsync(String username) {
+		Location location = this.getLocationAsync();
+		List<User> users = this.getLocationUsersAsync(location);
+		User _user = null;
+		for (User user : users) {
+			if (user.getUsername().equals(username)) {
+				_user = user;
+			}
+		}
+		return _user;
 	}
+
+	/**
+	 * call get location API and return fixed token user location;
+	 *
+	 * @return
+	 */
+	private Location getLocationAsync() {
+		Location location = locationApi.getMyLocationAsync(token);
+		return location;
+	}
+
+	/**
+	 * call get location users and return a list of user from that location
+	 *
+	 * @param location
+	 * @return
+	 */
+	private List<User> getLocationUsersAsync(Location location) {
+		List<User> users = locationApi.getLocationUsersAsync(token, location.LocationUniqueID, new Filter<User>());
+		return users;
+	}
+	
+	public List<TpaPackage> getAvailableTrans() {
+		PackageFilters fltr = new PackageFilters();
+		List<TpaPackage> packages = trushareApi.getPackagesAsync(token, fltr, PackageFilterType.RECEIVED);
+		return packages;
+	}
+
 }

@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.rocket.client.TpaContext;
 import com.rocket.tpa.api.CommunityApi;
@@ -55,8 +56,6 @@ import com.rocket.tpa.model.tpackage.TpaPackage;
  */
 public class TestOnDev {
 
-//	private Logger logger;
-	
 	// TRUcore user
 	public String recipientUsername = "ventchev11";
 	public String recipientFirstName = "Vladtest";
@@ -72,6 +71,8 @@ public class TestOnDev {
 	private LocationApi locationApi;
 	private CommunityApi communityApi;
 	private CustomCertificateToken token;
+	
+	private Callback cb;
 	
 	public static void main(String[] args) {
 //		// Downloads files in a multithreaded environment
@@ -127,10 +128,6 @@ public class TestOnDev {
 	public void setUploadFiles(String[] uploadFiles) {
 		this.uploadFiles = uploadFiles;
 	}
-	
-//	public void setLogger2(Logger logger) {
-//		this.logger = logger;
-//	}
 
 //	 @Test
 	public void testcase1() {
@@ -138,14 +135,9 @@ public class TestOnDev {
 	}
 
 //	@Test
-	public void testcase2() {
-		upload();
-	}
-
-	@Test
-	public void testcase3() {
-		download("8799H917575");
-	}
+//	public void testcase3() {
+//		download("8799H917575");
+//	}
 
 	@After
 	public void tearDown() {
@@ -163,7 +155,8 @@ public class TestOnDev {
 		identityApi.createKeyAsync(token, keyData);
 	}
 
-	private void upload() {
+	public void upload(Callback cb) {
+		this.cb = cb;
 		// Get sender's user profile
 		User sender = this.getUserAsync(this.senderUserName);
 		List<File> files = new ArrayList<File>();
@@ -299,6 +292,10 @@ public class TestOnDev {
 
 						@Override
 						public void onCompletelyFinish() {
+							
+//							DBinsert(package1);
+							cb.call(package1);
+							
 							System.out.println("UploadListener : onCompletelyFinish");
 							updateStatus(token, package1.PackageID, recipients, ShareActions.Send);
 						}
@@ -317,8 +314,19 @@ public class TestOnDev {
 		packageAction.ClientApp = "TFE";
 		trushareApi.actionPackageAsync(token, packageAction);
 	}
+	
+//	private void DBinsert(TpaPackage pack) {
+//		String sql1 = "UPDATE ddxadmin.JOB SET STATUS=2 where id="+jobId;
+//		this.jdbcTemplate.execute(sql1);
+//		
+//		String sql = "INSERT INTO ddxadmin.JOB_TRUCORE (ID,ID_JOB,TRANS_ID,TRANS_REF,STATUS_TRANS,STATUS_SENDER,STATUS_TEXT,DELETED) values ("+jobId+", "+jobId+", '"+pack.PackageID+"','"+pack.TransactionRefNumber+"',null,null,'Created',1)";
+//		this.jdbcTemplate.execute(sql);
+//		
+//		String sql3 = "INSERT INTO ddxadmin.JOB_CONTACT (ID, ID_JOB,ID_RECEIVER, RECEIVER_TYPE, FIRSTNAME, FAMILYNAME, department,phone, fax, email, id_medium, medium_type,engdat_abstract, engdat_confirm, deleted) VALUES ("+jobId+", "+jobId+", 4, 1, 'Vladtest', 'Test', '_2D', '123456789', '_22', 'Dummy_40Dummy.com1', 1, 10, 1,1, 1)";
+//		this.jdbcTemplate.execute(sql3);
+//	}
 
-	private void download(String refnumber) {
+	public void download(String refnumber, Callback callback) {
 		try {
 			PackageFilters fltr = new PackageFilters();
 			List<TpaPackage> packages = trushareApi.getPackagesAsync(token, fltr, PackageFilterType.RECEIVED);
@@ -386,6 +394,9 @@ public class TestOnDev {
 
 									@Override
 									public void onCompletelyFinish() {
+										
+										callback.call(pack);
+										
 										System.out.println("DownloadListener : onCompletelyFinish");
 										List<Recipient> lst = new ArrayList<Recipient>();
 										Recipient r = new Recipient();
@@ -445,5 +456,5 @@ public class TestOnDev {
 		List<User> users = locationApi.getLocationUsersAsync(token, location.LocationUniqueID, new Filter<User>());
 		return users;
 	}
-
+	
 }
