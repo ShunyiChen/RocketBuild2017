@@ -2,7 +2,6 @@ package com.rocket;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 
@@ -21,6 +20,7 @@ public class Response implements Serializable {
 	
 	private int jobId;
 	private String[] fileNames;
+	private long[] fileSize;
 	
 	private InputStream inputStream;
 	
@@ -75,4 +75,14 @@ public class Response implements Serializable {
 	public void setRefNumber(String refNumber) {
 		this.refNumber = refNumber;
 	}
+
+	public long[] getFileSize() {
+		return fileSize;
+	}
+
+	public void setFileSize(long[] fileSize) {
+		this.fileSize = fileSize;
+	}
+	
+	
 }

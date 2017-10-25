@@ -457,4 +457,8 @@ public class TestOnDev {
 		return users;
 	}
 	
+	
+	public String getTargetDir() {
+		return RuntimeConfig.DOWNLOAD_FOLDER;
+	}
 }

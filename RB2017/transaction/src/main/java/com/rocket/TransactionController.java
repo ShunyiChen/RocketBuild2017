@@ -1,14 +1,10 @@
 package com.rocket;
 
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,7 +37,7 @@ public class TransactionController {
 	@ResponseBody
     public Response getJobs(@RequestBody Request request) {
 		int userId = request.getUserId();
-		logger.info("Get jobs by userId ");
+		logger.info("Get jobs by userId "+userId);
 		if (userId == -1) {
 			return new Response(HttpStatus.BAD_REQUEST);
 		}
@@ -53,21 +49,15 @@ public class TransactionController {
 		}
 		// Get available transactions, If the transaction doesn't exist then to create.
 		List<TpaPackage> lst = dev.getAvailableTrans();
-		String sql = "SELECT A.id as ID,B.trans_ref as REFNUMBER,A.JOB_TYPE as JOB_TYPE,A.STATUS as status,A.DESCRIPTION_1 as desc1,C.firstname as firstname,C.familyname as familyname,A.JOB_DATE as jobdate,D.display_name as filename FROM DDXADMIN.JOB A LEFT JOIN DDXADMIN.JOB_TRUCORE B ON A.ID = B.ID_JOB LEFT JOIN DDXADMIN.JOB_CONTACT C ON A.ID=C.ID_JOB LEFT JOIN DDXADMIN.JOB_MODEL D ON A.ID=D.ID_JOB WHERE A.ID_USER = "+userId+" AND A.DELETED = 1 ORDER BY A.ID DESC";
+		String sql = "SELECT A.id as ID,B.trans_ref as REFNUMBER,A.JOB_TYPE as JOB_TYPE,A.STATUS as status,A.DESCRIPTION_1 as desc1,C.firstname as firstname,C.familyname as familyname,A.JOB_DATE as jobdate,D.display_name as filename,D.datasize as filesize FROM DDXADMIN.JOB A LEFT JOIN DDXADMIN.JOB_TRUCORE B ON A.ID = B.ID_JOB LEFT JOIN DDXADMIN.JOB_CONTACT C ON A.ID=C.ID_JOB LEFT JOIN DDXADMIN.JOB_MODEL D ON A.ID=D.ID_JOB WHERE A.ID_USER = "+userId+" AND A.DELETED = 1 ORDER BY A.ID DESC";
 		List<Map<String, Object>> results = jdbcTemplate.queryForList(sql);
-		
-		List<String> list = new ArrayList<>();
-		list.add("8799H917661");
-		list.add("8799H917658");
-		list.add("8799H917601");
-		
 		for (TpaPackage tp : lst) {
-			
-			// temp filter
-			if (!list.contains(tp.TransactionRefNumber)) {
+			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+			String createDate = sdf.format(tp.CreatedDate);
+			String currentDate = sdf.format(new Date());
+			if (!createDate.equals(currentDate)) {
 				continue;
 			}
-			
 			if (!existCheck(tp.TransactionRefNumber, results)) {
 				logger.info("You received a new transaction which the trans_ref is "+tp.TransactionRefNumber+"!");
 				jobId++;

@@ -1,33 +1,22 @@
 package com.rocket;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -36,7 +25,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.rocket.tpa.config.RuntimeConfig;
 import com.rocket.tpa.model.tpackage.TpaPackage;
 
 @RestController
@@ -54,6 +42,10 @@ public class FileController {
 		logger = Logger.getLogger(getClass().getName());
 		// Setup TPA SDK
 //    	context = new TpaContext(getClass().getResourceAsStream("/tpa-sdk-config.dev.xml"));
+		File tempFolder = new File(tempDir);
+		if(!tempFolder.exists()) {
+			tempFolder.mkdirs();
+		}
 	}
 	
 	@RequestMapping(value="/send",method = RequestMethod.POST)
@@ -90,9 +82,8 @@ public class FileController {
 	@RequestMapping(value="/submit",method = RequestMethod.POST)
 	@ResponseBody
     public Response submit(@RequestBody Request request) {
-		logger.info("===============================================================================================================================================================================================================================================submit");
-		
 		String randomId = request.getRandomId();
+		logger.info("================================================submit:randomId="+randomId);
 		File p = new File(tempDir+""+randomId);
 		if (p.exists()) {
 			
@@ -228,15 +219,6 @@ public class FileController {
 		jdbcTemplate.execute(sql7);
 	}
 	
-//	private void DBupdate(int jobId) {
-//		String dt = System.currentTimeMillis()+"";
-//		dt = dt.substring(0, dt.length() -3);
-//		int datetime = Integer.parseInt(dt);
-//		String sql = "UPDATE ddxadmin.JOB SET STATUS=2,JOB_DATE= "+datetime+",LAST_ACCESS= "+datetime+",LAST_SEND="+datetime+" WHERE ID="+jobId;
-//		logger.info("SQL="+sql);
-//		jdbcTemplate.execute(sql);
-//	}
-	
 	@RequestMapping(value="/receive",method = RequestMethod.POST)
 	@ResponseBody
     public Response receive(@RequestBody Request request) {
@@ -245,38 +227,127 @@ public class FileController {
 			return new Response(HttpStatus.BAD_REQUEST);
 		}
 		Response res = new Response(HttpStatus.OK);
+		
+		TestOnDev t = new TestOnDev();
+		t.setUp();
 		Callback callback = new Callback() {
 			@Override
 			public void call(TpaPackage tpa) {
-				String[] filePaths = new String[tpa.Payloads.size()];
+				String[] fileNames = new String[tpa.Payloads.size()];
+				long[] fileSizes = new long[fileNames.length];
 				for (int i = 0; i < tpa.Payloads.size(); i++) {
-					filePaths[i] = RuntimeConfig.DOWNLOAD_FOLDER+tpa.Payloads.get(i).FileName;
+					fileNames[i] = tpa.Payloads.get(i).FileName;
+					fileSizes[i] = new File(t.getTargetDir()+""+fileNames[i]).length();
 				}
-				res.setFileNames(filePaths);
+				res.setFileNames(fileNames);
+				res.setFileSize(fileSizes);
 			}
 		};
-		TestOnDev t = new TestOnDev();
-		t.setUp();
 		t.download(refNumber, callback);
+		
 		return res;
 	}
 	
-	@RequestMapping(path = "/download", method = RequestMethod.POST)
-	@ResponseBody
-    public Response download(@RequestBody Request request) {
-		if (request.getFilename() == null) {
-			return new Response(HttpStatus.BAD_REQUEST);
-		}
-		Response res = new Response(HttpStatus.OK);
-		try {
-			InputStream is = new FileInputStream(request.getFilename());
-			res.setInputStream(is);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-        return res;
-	}
+	@RequestMapping(value = "/files", method = RequestMethod.POST)
+    public ResponseEntity<byte[]> downloadFile(@RequestBody Request request) throws IOException {
+        String filename = "C:\\Rocket\\Trubiquity\\Truexchange\\tmp\\download\\"+request.getFilename();//"D:/tmp/" + name + ".jpg";
+        logger.info("==================Downloading file filename="+filename+"==================");
+        InputStream inputImage = new FileInputStream(filename);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[512];
+        int l = inputImage.read(buffer);
+        while(l >= 0) {
+            outputStream.write(buffer, 0, l);
+            l = inputImage.read(buffer);
+        }
+        inputImage.close();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", getContentType(filename.substring(filename.lastIndexOf(".")+1)));
+        headers.set("Content-Disposition", "attachment; filename=\"" + request.getFilename() + "\"");
+        return new ResponseEntity<byte[]>(outputStream.toByteArray(), headers, HttpStatus.OK);
+    }
+    
+    private String getContentType(String suffix) {
+    	 String [][]  MIME_MapTable={
+
+    	        //{后缀名，MIME类型}
+    	        {".3gp",    "video/3gpp"},
+    	        {".apk",    "application/vnd.android.package-archive"},
+    	        {".asf",    "video/x-ms-asf"},
+    	        {".avi",    "video/x-msvideo"},
+    	        {".bin",    "application/octet-stream"},
+    	        {".bmp",    "image/bmp"},
+    	        {".c",  "text/plain"},
+    	        {".class",  "application/octet-stream"},
+    	        {".conf",   "text/plain"},
+    	        {".cpp",    "text/plain"},
+    	        {".doc",    "application/msword"},
+    	        {".docx",   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+    	        {".xls",    "application/vnd.ms-excel"},
+    	        {".xlsx",   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+    	        {".exe",    "application/octet-stream"},
+    	        {".gif",    "image/gif"},
+    	        {".gtar",   "application/x-gtar"},
+    	        {".gz", "application/x-gzip"},
+    	        {".h",  "text/plain"},
+    	        {".htm",    "text/html"},
+    	        {".html",   "text/html"},
+    	        {".jar",    "application/java-archive"},
+    	        {".java",   "text/plain"},
+    	        {".jpeg",   "image/jpeg"},
+    	        {".jpg",    "image/jpeg"},
+    	        {".js", "application/x-javascript"},
+    	        {".log",    "text/plain"},
+    	        {".m3u",    "audio/x-mpegurl"},
+    	        {".m4a",    "audio/mp4a-latm"},
+    	        {".m4b",    "audio/mp4a-latm"},
+    	        {".m4p",    "audio/mp4a-latm"},
+    	        {".m4u",    "video/vnd.mpegurl"},
+    	        {".m4v",    "video/x-m4v"},
+    	        {".mov",    "video/quicktime"},
+    	        {".mp2",    "audio/x-mpeg"},
+    	        {".mp3",    "audio/x-mpeg"},
+    	        {".mp4",    "video/mp4"},
+    	        {".mpc",    "application/vnd.mpohun.certificate"},
+    	        {".mpe",    "video/mpeg"},
+    	        {".mpeg",   "video/mpeg"},
+    	        {".mpg",    "video/mpeg"},
+    	        {".mpg4",   "video/mp4"},
+    	        {".mpga",   "audio/mpeg"},
+    	        {".msg",    "application/vnd.ms-outlook"},
+    	        {".ogg",    "audio/ogg"},
+    	        {".pdf",    "application/pdf"},
+    	        {".png",    "image/png"},
+    	        {".pps",    "application/vnd.ms-powerpoint"},
+    	        {".ppt",    "application/vnd.ms-powerpoint"},
+    	        {".pptx",   "application/vnd.openxmlformats-officedocument.presentationml.presentation"},
+    	        {".prop",   "text/plain"},
+    	        {".rc", "text/plain"},
+    	        {".rmvb",   "audio/x-pn-realaudio"},
+    	        {".rtf",    "application/rtf"},
+    	        {".sh", "text/plain"},
+    	        {".tar",    "application/x-tar"},
+    	        {".tgz",    "application/x-compressed"},
+    	        {".txt",    "text/plain"},
+    	        {".wav",    "audio/x-wav"},
+    	        {".wma",    "audio/x-ms-wma"},
+    	        {".wmv",    "audio/x-ms-wmv"},
+    	        {".wps",    "application/vnd.ms-works"},
+    	        {".xml",    "text/plain"},
+    	        {".z",  "application/x-compress"},
+    	        {".zip",    "application/x-zip-compressed"},
+    	        {"",        "*/*"}
+    	};
+
+    	for (int i = 0; i < MIME_MapTable.length; i++) {
+    		if (MIME_MapTable[i][0].equals(suffix)) {
+    			logger.info("====================content-type:"+MIME_MapTable[i][1]);
+    			return MIME_MapTable[i][1];
+    		}
+    	}
+    	
+    	return "application/octet-stream";
+    }
+    
 	
- 
-	 
 }
