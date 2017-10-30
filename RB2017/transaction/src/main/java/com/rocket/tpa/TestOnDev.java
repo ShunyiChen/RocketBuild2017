@@ -122,10 +122,10 @@ public class TestOnDev {
 	@Before
 	public void setUp() {
 		System.out.println("SDK initialization ...");
-		context = new TpaContext(getClass().getResourceAsStream("/tpa-sdk-config.dev.xml"));
+		context = new TpaContext("C:\\Users\\chens\\Documents\\development\\rocket-build2017\\RB2017\\transaction\\src\\main\\resources\\tpa-sdk-config.dev.xml");
 //		context = new TpaContext(
 //				"C:\\Users\\chens\\Documents\\development\\gxg_java\\TPA-SDK-Java\\config\\tpa-sdk-config.dev.xml");
-		mfxClient = (MFXClient) context.getApi("MFXClient");
+		mfxClient = (MFXClient) context.getApi("MFXClient-UDT");
 		identityApi = (IdentityApi) context.getApi("IdentityApi");
 		locationApi = (LocationApi) context.getApi("LocationApi");
 		trushareApi = (TrushareApi) context.getApi("TrushareApi");

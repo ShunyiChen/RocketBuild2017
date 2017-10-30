@@ -227,8 +227,37 @@ public class FileController {
 			return new Response(HttpStatus.BAD_REQUEST);
 		}
 		Response res = new Response(HttpStatus.OK);
+		/// ===================================== time1
+		final TestOnDev2 t = new TestOnDev2();
+		t.setUp();
+		Callback callback = new Callback() {
+			@Override
+			public void call(TpaPackage tpa) {
+				String[] fileNames = new String[tpa.Payloads.size()];
+				long[] fileSizes = new long[fileNames.length];
+				for (int i = 0; i < tpa.Payloads.size(); i++) {
+					fileNames[i] = tpa.Payloads.get(i).FileName;
+					fileSizes[i] = new File(t.getTargetDir()+""+fileNames[i]).length();
+				}
+				res.setFileNames(fileNames);
+				res.setFileSize(fileSizes);
+			}
+		};
+		t.download(refNumber, callback);
 		
-		TestOnDev t = new TestOnDev();
+		return res;
+	}
+	
+	@RequestMapping(value="/receive2",method = RequestMethod.POST)
+	@ResponseBody
+    public Response receive2(@RequestBody Request request) {
+		String refNumber = request.getRefNumber();
+		if (refNumber == null) {
+			return new Response(HttpStatus.BAD_REQUEST);
+		}
+		Response res = new Response(HttpStatus.OK);
+		/// ===================================== time1
+		final TestOnDev t = new TestOnDev();
 		t.setUp();
 		Callback callback = new Callback() {
 			@Override

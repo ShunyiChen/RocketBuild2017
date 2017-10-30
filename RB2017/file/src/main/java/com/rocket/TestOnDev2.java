@@ -54,7 +54,7 @@ import com.rocket.tpa.model.tpackage.TpaPackage;
  * 
  * @author chens
  */
-public class TestOnDev {
+public class TestOnDev2 {
 
 	// TRUcore user
 	public String recipientUsername = "ventchev11";
@@ -116,7 +116,7 @@ public class TestOnDev {
 		context = new TpaContext("C:\\Users\\chens\\Documents\\development\\rocket-build2017\\RB2017\\file\\src\\main\\resources\\tpa-sdk-config.dev.xml");
 //		context = new TpaContext(
 //				"C:\\Users\\chens\\Documents\\development\\gxg_java\\TPA-SDK-Java\\config\\tpa-sdk-config.dev.xml");
-		mfxClient = (MFXClient) context.getApi("MFXClient-UDT");
+		mfxClient = (MFXClient) context.getApi("MFXClient-HTTP");
 		identityApi = (IdentityApi) context.getApi("IdentityApi");
 		locationApi = (LocationApi) context.getApi("LocationApi");
 		trushareApi = (TrushareApi) context.getApi("TrushareApi");
